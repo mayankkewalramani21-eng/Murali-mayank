@@ -1,0 +1,18 @@
+#%RAML 1.0 SecurityScheme
+type: x-client-Id-enforcement
+description: Client ID Enforcement based Security
+describedBy:
+  headers:
+    client_id:
+      type: string
+      maxLength: 50
+      displayName: Client ID
+    client_secret:
+      type: string
+      maxLength: 50
+      displayName: Client Secret
+  responses:
+    401:
+      description: Unauthorized or invalid client application credentials
+    500:
+      description: Bad response from authorization server

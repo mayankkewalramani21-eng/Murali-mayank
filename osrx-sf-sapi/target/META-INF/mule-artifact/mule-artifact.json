@@ -1,0 +1,50 @@
+{
+  "configs": [
+    "global-config.xml",
+    "implementation.xml",
+    "osrx-sf-sapi.xml",
+    "global-error-handler.xml"
+  ],
+  "secureProperties": [],
+  "supportedJavaVersions": [],
+  "redeploymentEnabled": true,
+  "name": "c7474abc-2ba6-4cf1-9c64-505977bdc329:osrx-sf-sys-api:1.0.1",
+  "minMuleVersion": "4.9.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "log4j2.xml",
+        "global-config.xml",
+        "application-types.xml",
+        "salesforceKeys/dev.jks",
+        "salesforceKeys/prod.jks",
+        "dwl/upsert-payload-csv.dwl",
+        "dwl/create-payload-java.dwl",
+        "dwl/msg-payload-to-java.dwl",
+        "dwl/upsert-payload-java.dwl",
+        "dwl/msg-payload-to-json.dwl",
+        "properties/test.yaml",
+        "properties/dev.yaml",
+        "properties/common.yaml",
+        "properties/prod.yaml",
+        "osrx-sf-sapi.xml",
+        "api/resources/errorResponseTrait.raml",
+        "api/resources/clientIdEnforcementSecurityScheme.raml",
+        "api/examples/salesforce200Response.json",
+        "api/examples/salesforceUpsertRequest.json",
+        "api/examples/500Response.json",
+        "api/examples/400Response.json",
+        "api/osrx-sf-sapi.raml",
+        "implementation.xml",
+        "global-error-handler.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

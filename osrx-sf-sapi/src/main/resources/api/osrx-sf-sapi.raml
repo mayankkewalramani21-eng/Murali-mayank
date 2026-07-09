@@ -1,0 +1,47 @@
+#%RAML 1.0
+title: osrx-sf-sapi
+description: This API is designed to extract and push data from and to Salesforce system
+version: v1
+protocols:
+  - HTTPS
+
+securitySchemes:
+  client-id-enforcement: !include resources/clientIdEnforcementSecurityScheme.raml
+
+traits:
+  having-error-responses: !include resources/errorResponseTrait.raml
+
+/salesforce:
+  is: having-error-responses
+  securedBy: client-id-enforcement
+  post:
+    description: To fetch and modify data into Salesforce system
+    headers:
+      operation:
+        required: true
+        type: string
+        enum:
+          - query
+          - upsert
+          - create
+          - delete
+          - compositerequest
+          - bulk-upsert
+          - get-jobstate
+          - failed
+          - success
+      object-name:
+        required: false
+        type: string
+        example: Account
+      external-id-field-name:
+        required: false
+        default: Id
+    body:
+      application/json:
+        example: !include examples/salesforceUpsertRequest.json
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/salesforce200Response.json

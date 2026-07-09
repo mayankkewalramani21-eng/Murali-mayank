@@ -1,0 +1,5 @@
+{
+  "code": "400",
+  "status": "Bad Request",
+  "errorMessage": "The request could not be handled by the server due to bad data provided."
+}

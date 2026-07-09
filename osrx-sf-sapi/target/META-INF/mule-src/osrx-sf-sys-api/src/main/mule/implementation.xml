@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite" xmlns:outlook365="http://www.mulesoft.org/schema/mule/outlook365"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/outlook365 http://www.mulesoft.org/schema/mule/outlook365/current/mule-outlook365.xsd
+http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd">
+	<sub-flow name="query-sf-records-sub-flow" doc:id="36d2c171-246c-4080-879b-fc81ec3d6a61" >
+		<logger level="INFO" doc:name="start-of-query-subflow" doc:id="8525e214-958e-49b3-bcbb-aac230882b8b" message="start of query subflow"/>
+		<ee:transform doc:name="Payload to JAVA" doc:id="799d468a-690f-4d59-8abd-08ce30e3fdee">
+			<ee:message>
+				<ee:set-payload resource="dwl/msg-payload-to-java.dwl" />
+			</ee:message>
+		</ee:transform>
+		<salesforce:query doc:name="Query Records" doc:id="faa7cc78-5315-49c4-83b3-2f3cba1415ea" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query><![CDATA[#[payload]]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Payload to JSON" doc:id="e2c0a612-73bd-400d-825f-6f5131fb20c5" >
+			<ee:message >
+				<ee:set-payload resource="dwl/msg-payload-to-json.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of query records sub flow" doc:id="9980d0bc-987e-4985-ba13-9484b68be0fd" message="end of query records sub flow" />
+	
+</sub-flow>
+	<sub-flow name="upsert-sf-records-sub-flow" doc:id="43afb2c6-3bc5-4d16-83ca-1976ecac8766" >
+		<logger level="INFO" doc:name="start of upsert-sf-records-sub-flow" doc:id="01157068-1c11-4020-9c85-938baa3bab5d" message="start of upsert-sf-records-sub-flow" />
+		<ee:transform doc:name="upsert payload java" doc:id="157a67f9-3a96-44be-b710-c83faa12936f">
+					<ee:message>
+						<ee:set-payload resource="dwl/upsert-payload-java.dwl" />
+					</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="duplicates" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"DuplicateRuleHeader": {
+		"allowSave": true,
+		"includeRecordDetails": false,
+		"runAsCurrentUser": false
+	}
+}]]></ee:set-variable>
+			</ee:variables>
+				</ee:transform>
+		<salesforce:upsert doc:name="Upsert" doc:id="69c9d394-1f6a-4091-be31-52028293fb09" config-ref="Salesforce_Config" externalIdFieldName='#[attributes.headers."external-id-field-name" default "Id"]' objectType='#[attributes.headers."object-name"]' headers="#[vars.duplicates]" />
+		<ee:transform doc:name="Payload to JSON" doc:id="f89ad974-0651-4f17-9f02-6a042daa1c3c" >
+			<ee:message >
+				<ee:set-payload resource="dwl/msg-payload-to-json.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of upsert-sf-records-sub-flow" doc:id="16af028c-9231-4e31-b861-abef95551210" message="end of upsert-sf-records-sub-flow" />
+	</sub-flow>
+	<sub-flow name="create-sf-records-sub-flow" doc:id="b7a849f8-40cf-4ff8-a9ab-0c55c035d5ff" >
+		<logger level="INFO" doc:name="start-of-create-subflow" doc:id="2fb5d275-b2f6-4394-bd22-371b3d0cf66b" message="start of create-subflow" />
+		<ee:transform doc:name="create payload java" doc:id="9c1e86a0-f168-4503-81dc-bdb1c9f68bf4" >
+			<ee:message >
+				<ee:set-payload resource="dwl/create-payload-java.dwl" />
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type='#[attributes.headers."object-name"]' doc:name="Create" doc:id="3f8f53a0-4d05-43d7-af09-4bbb34717bfb" config-ref="Salesforce_Config" />
+		<ee:transform doc:name="Payload to JSON" doc:id="1b0759d8-e939-49c1-abf4-636538719fc7" >
+			<ee:message >
+				<ee:set-payload resource="dwl/msg-payload-to-json.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of create records sub flow" doc:id="03c29687-7b79-4bf5-9bf2-460264489335" message="end of create records sub flow" />
+	</sub-flow>
+	<sub-flow name="bulk-upsert-sf-records-sub-flow" doc:id="c3e736f6-432b-45ce-8f19-7514fa039706" >
+		<logger level="INFO" doc:name="start of bulk-upsert-sf-records-sub-flow" doc:id="7f0d2d4b-b1e2-40cc-bb17-91b279617023" message="start of bulk-upsert-sf-records-sub-flow" />
+		<ee:transform doc:name="upsert payload csv" doc:id="44a4c74b-a535-40f8-839e-22580b64a6ea" >
+			<ee:message >
+				<ee:set-payload resource="dwl/upsert-payload-csv.dwl" />
+			</ee:message>
+		</ee:transform>
+		<salesforce:create-job-bulk-api-v2 objectType='#[attributes.headers."object-name"]' operation="upsert" doc:name="Create Records in bulk" doc:id="618e1d91-d2a1-45cf-b1d3-e1789a97cf26" config-ref="Salesforce_Config" externalIdFieldName='#[attributes.headers."external-id-field-name" default "Id"]' />
+		<ee:transform doc:name="Payload to JSON" doc:id="80cce140-5c74-49a8-b464-fbff3a996bfe" >
+			<ee:message >
+				<ee:set-payload resource="dwl/msg-payload-to-json.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of create-sf-records-sub-flow" doc:id="63ed8e9b-bd11-47b3-8efc-ef535826db70" message="end of create-sf-records-sub-flow" />
+	</sub-flow>
+	<sub-flow name="get-jobstate-sf-records-sub-flow" doc:id="23f89938-ecb1-44db-8ea5-466bc2006120" >
+		<logger level="INFO" doc:name="start of job-state-sf-records-sub-flow" doc:id="6c6bbfbb-1a0c-465c-8b43-d2526177b693" message="start of job-state-sf-records-sub-flow" />
+		<ee:transform doc:name="Transform Message" doc:id="4040c3e5-62b5-472a-ac84-c108d6dee5af" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:get-job-state-bulk-api-v2 doc:name="Get job state bulk api v 2" doc:id="68b1989f-728c-4000-95b6-7470f729b675" config-ref="Salesforce_Config" id="#[payload]" />
+		<ee:transform doc:name="Payload to JSON" doc:id="67a8e5ca-0daf-4da6-bf6e-20d35cb76ddf" >
+			<ee:message >
+				<ee:set-payload resource="dwl/msg-payload-to-json.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End of job-state-sf-records-sub-flow" doc:id="24284db1-3783-45ac-a09f-f193c015c070" message="End of job-state-sf-records-sub-flow" />
+	</sub-flow>
+	<sub-flow name="failed-sf-records-sub-flow" doc:id="2fe07add-e2fa-4d26-9da1-d4cd8b253136" >
+		<logger level="INFO" doc:name="start of failed-sf-records-sub-flow" doc:id="01e7f8a3-d330-4d51-a6d2-f2c4dcbfddc2" message="start of failed-sf-records-sub-flow" />
+		<ee:transform doc:name="Transform Message" doc:id="61efb340-953b-4f87-a46d-8bc5a24ebb0c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:retrieve-job-failed-results-bulk-v2 doc:name="Retrieve job failed results bulk v " doc:id="2ba3c664-5f52-42be-872d-30221d5a5f25" config-ref="Salesforce_Config" id="#[payload]" />
+		<ee:transform doc:name="Payload to JSON" doc:id="ba34ea92-bd1a-4357-8d61-46eebc73842f" >
+			<ee:message >
+				<ee:set-payload resource="dwl/msg-payload-to-json.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End of failed-sf-records-sub-flow" doc:id="deb470ee-c60f-4f51-85f0-8bd617c2743c" message="End of failed-sf-records-sub-flow" />
+	</sub-flow>
+	<sub-flow name="success-sf-records-sub-flow" doc:id="16b89980-b4a7-4bb7-8c4d-df9fc4f2d426" >
+		<logger level="INFO" doc:name="start of success-sf-records-sub-flow" doc:id="0bf29e78-4dee-475b-87c8-299a20a95e2d" message="start of success-sf-records-sub-flow" />
+		<ee:transform doc:name="Transform Message" doc:id="d55c4de3-511f-4556-bb66-f55ee516d50d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:retrieve-job-successful-results-bulk-v2 doc:name="Retrieve job successful results bulk v 2" doc:id="737d95d9-c520-47cd-acaa-71692f6f61e0" config-ref="Salesforce_Config" id="#[payload]"/>
+		<ee:transform doc:name="Payload to JSON" doc:id="efcd1a43-2607-45af-8e7a-731509d1f70b" >
+			<ee:message >
+				<ee:set-payload resource="dwl/msg-payload-to-json.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End of success-sf-records-sub-flow" doc:id="9d409e86-3d79-493a-8dcc-c34af15943f0" message="End of success-sf-records-sub-flow" />
+	</sub-flow>
+	<sub-flow name="delete-sf-records-sub-flow" doc:id="8fc49e84-fc13-4214-aa04-c0bcdb049f84" >
+		<logger level="INFO" doc:name="start of delete subflow" doc:id="7c366161-67b2-4ad4-ac73-57105164dddf" message="start of delete subflow" />
+		<ee:transform doc:name="Payload to JAVA" doc:id="8c06e066-505b-492c-8843-23b3aebe130d">
+			<ee:message>
+				<ee:set-payload resource="dwl/msg-payload-to-java.dwl" />
+			</ee:message>
+		</ee:transform>
+		<salesforce:delete doc:name="Delete records" doc:id="49b14da6-6196-4ebf-a340-1e57f86e4d94" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="Payload to JSON" doc:id="fd22d8cb-d625-4e30-a37a-70ba83bae7e6" >
+			<ee:message >
+				<ee:set-payload resource="dwl/msg-payload-to-json.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of delete records sub flow" doc:id="9026c565-2e87-40aa-90fe-7a7140a5a3d2" message="end of delete records sub flow" />
+	</sub-flow>
+	<sub-flow name="compositerequest-sf-records-sub-flow" doc:id="9d86632e-32f2-475d-b7c2-2bc1faf96a03" >
+		<logger level="INFO" doc:name="start of sfcomposite records subflow" doc:id="c352ddf9-e6aa-44de-9903-447396375baf" message="start of sfcomposite records subflow" />
+		<ee:transform doc:name="Payload to JAVA" doc:id="9234fd35-7930-4bc0-8f7d-4309d671b2e6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+fun getType(fieldValue, fieldType, fieldFormat) = if(fieldType == "Date")
+    fieldValue as Date{format: fieldFormat} default null
+    else if(fieldType == "DateTime")
+    fieldValue as DateTime{format: fieldFormat} default null
+    else if(fieldType == "LocalDateTime")
+    fieldValue as LocalDateTime{format: fieldFormat} default null
+    else if(fieldType == "Time")
+    fieldValue as Time{format: fieldFormat} default null
+    else if(fieldType == "LocalTime")
+    fieldValue as LocalTime{format: fieldFormat} default null
+    else
+    fieldValue
+fun checkForDateObjects(data) = data match {
+    case is Array -> data map checkForDateObjects($)
+    case is Object -> 
+        if ((namesOf(data) contains "fieldValue") and (namesOf(data) contains "fieldType")) 
+            getType(data.fieldValue, data.fieldType, data.fieldFormat)
+        else 
+            data mapObject (($$): checkForDateObjects($))
+    else -> data
+}
+---
+checkForDateObjects(payload)
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce-composite:execute-composite-request doc:name="Execute composite request" doc:id="91d682dd-5d18-4c41-abf6-78c910195f70" config-ref="Salesforce_Composite_Config" />
+		<ee:transform doc:name="Payload to JSON" doc:id="21772e0a-028f-40a0-a9dc-6e46d5465790" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of sfcomposite records sub flow" doc:id="dd3795a2-3302-4d43-b2bd-cdb2c3bad5a9" message="end of sfcomposite records sub flow" />
+	</sub-flow>
+
+</mule>

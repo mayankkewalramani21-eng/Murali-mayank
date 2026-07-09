@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite" xmlns:cluster="http://www.mulesoft.org/schema/mule/ee/cluster" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:error-handler-plugin="http://www.mulesoft.org/schema/mule/error-handler-plugin" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:spring="http://www.mulesoft.org/schema/mule/spring" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd http://www.mulesoft.org/schema/mule/error-handler-plugin http://www.mulesoft.org/schema/mule/error-handler-plugin/current/mule-error-handler-plugin.xsd http://www.mulesoft.org/schema/mule/spring http://www.mulesoft.org/schema/mule/spring/current/mule-spring.xsd http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd">
+    <http:listener-config name="osrx-sf-sapi-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" readTimeout="60000" connectionIdleTimeout="60000"/>
+    </http:listener-config>
+    <apikit:config name="osrx-sf-sapi-config" api="osrx-sf-sapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <configuration-properties doc:name="Configuration properties" doc:id="b6873c85-8e02-475b-8bb6-af8d7b89e068" doc:description="Environment-agnostic properties" file="properties/common.yaml" />
+    <secure-properties:config name="common-secure-properties-config" doc:name="Secure Properties Config" doc:id="1307d2b3-bcff-48df-a5ca-7de80c73c1f0" doc:description="Environment-agnositic secure properties" file="properties/common.yaml" key="${mule.key}" />
+    <configuration-properties doc:name="Configuration properties" doc:id="8b849383-f552-4d09-a14e-bbd7c03936a2" file="properties/${mule.env}.yaml" doc:description="Environment-specific properties" />
+    <secure-properties:config name="env-secure-properties-config" doc:name="Secure Properties Config" doc:id="985be77c-df4f-4472-b35a-7d68172cbe7a" doc:description="Environment-specific secure properties" file="properties/${mule.env}.yaml" key="${mule.key}" />
+    <salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="e1aaf632-d440-4e31-8faf-e7d9b597a21e" fetchAllApexRestMetadata="true">
+		<salesforce:jwt-connection consumerKey="${secure::salesforce.consumerKey}" keyStore="${secure::salesforce.keyStore}" storePassword="${secure::salesforce.storePassword}" principal="${secure::salesforce.principal}" tokenEndpoint="${secure::salesforce.tokenEndpoint}">
+			<reconnection failsDeployment="true" >
+				<reconnect frequency="${salesforce.reconnection.frequency}" count="${salesforce.reconnection.attempts}"/>
+			</reconnection>
+		</salesforce:jwt-connection>
+    </salesforce:sfdc-config>
+<!--    <http:request-config name="Process_Layer_HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="ac23483a-55b1-42ff-965b-3b8d22e4f2b5" basePath="${secure::prc-layer.basepath}" responseTimeout="${secure::prc-layer.responseTimeout}"> -->
+<!-- 		<http:request-connection protocol="HTTPS" host="${secure::prc-layer.host}" port="${secure::prc-layer.port}" > -->
+<!-- 			<reconnection > -->
+<!-- 				<reconnect frequency="${secure::prc-layer.reconnection.frequency}" count="${secure::prc-layer.reconnection.attempts}" /> -->
+<!-- 			</reconnection> -->
+<!-- 		</http:request-connection> -->
+<!-- 		<http:default-headers > -->
+<!-- 			<http:default-header key="client_id" value="${secure::prc-layer.clientId}" /> -->
+<!-- 			<http:default-header key="client_secret" value="${secure::prc-layer.clientSecret}" /> -->
+<!-- 		</http:default-headers> -->
+<!-- 	</http:request-config> -->
+	<configuration doc:name="Configuration" doc:id="afa2eaa7-cb7b-430a-8be1-e057b6d57238" defaultErrorHandler-ref="global-error-handler" doc:description="Global configuration for default error handler" >
+
+	</configuration>
+	<api-gateway:autodiscovery apiId="${api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="5de063e5-702e-45f7-a4f0-1c32e43e1e03" flowRef="osrx-sf-sapi-main"/>
+	<salesforce-composite:composite-config name="Salesforce_Composite_Config" doc:name="Salesforce Composite Config" doc:id="ec78f82f-1328-4da7-91af-a5b58f00e203" >
+		<salesforce-composite:oauth-jwt-connection consumerKey="${secure::salesforce.consumerKey}" keyStore="${secure::salesforce.keyStore}" storePassword="${secure::salesforce.storePassword}" principal="${secure::salesforce.principal}" tokenEndpoint="${secure::salesforce.tokenEndpoint}" responseTimeout="${salesforce.responseTimeout}" connectionTimeout="${salesforce.connectionTimeout}" responseTimeoutTimeUnit="MILLISECONDS" connectionTimeoutTimeUnit="MILLISECONDS">
+			<reconnection failsDeployment="true" >
+				<reconnect frequency="${salesforce.reconnection.frequency}" count="${salesforce.reconnection.attempts}"/>
+			</reconnection>
+		</salesforce-composite:oauth-jwt-connection>
+	</salesforce-composite:composite-config>
+</mule>

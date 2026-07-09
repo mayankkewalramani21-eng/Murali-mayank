@@ -1,0 +1,22 @@
+# Production environment-specific properties
+api:
+  id: "20490728"
+
+salesforce: #update for prod
+  consumerKey: "3MVG9LBJLApeX_PBNozWiyOGhcUchN5lv3Z11NtUtAdyfaV0MgT5w7lmWFoTDnJ7hU20DCNGChILnAik0QF99"
+  #username: mulesoftintegrations@minlopro.com.dev
+  storePassword: "![lMIzNMqMfYjNrDJw/DzsyA==]"
+  
+  #channel: "/event/Pro_FaxPlatformEvent__e"
+  keyStore: "${app.home}/salesforceKeys/${mule.env}.jks"
+  principal: "mulesoftintegrationuser@minlopro.com.osrx.prod"
+  tokenEndpoint: "https://login.salesforce.com/services/oauth2/token"
+  
+#prc-layer:
+#  host: "prod-pros-srfax-sf-sync-papi-3pivmr.eu0drd.usa-e2.cloudhub.io"
+#  port: "443"
+#  basepath: "/api"
+#  path:
+#    event: "/events"
+#  clientId: "![svNILI/D7AwirlRdkJDIf/Z3sxDIU9Suf5mxsGq0nGrK42XFc3wO0om9iYylGOaD]"
+#  clientSecret: "![W+1aS+7HoCnkxA0Sc8riW0K9L1e4XqZmDS3mgIinbf5g6b27cDSaE7fxNeda4fII]"
