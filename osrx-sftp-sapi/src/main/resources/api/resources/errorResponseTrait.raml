@@ -1,0 +1,15 @@
+#%RAML 1.0 Trait
+usage: Common Exceptions - Reusable Traits
+description: The common error response
+responses:
+  400:
+    description: Bad request
+    body:
+      application/json:
+        example: !include ../examples/400Response.json
+
+  500:
+    description: Internal Server Error
+    body:
+      application/json:
+        example: !include ../examples/500Response.json

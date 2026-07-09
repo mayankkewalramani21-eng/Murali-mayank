@@ -1,0 +1,14 @@
+# Environment-agnostic properties
+api:
+  name: osrx-sftp-sapi
+
+listener:
+  protocol: "HTTP"
+  host: "0.0.0.0"
+  port: "8081"
+  readTimeout: "300000"
+
+sftp-osrx:
+  reconnection:
+    attempts: "3"
+    frequency: "3000"

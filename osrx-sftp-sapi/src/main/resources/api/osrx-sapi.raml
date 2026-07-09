@@ -1,0 +1,35 @@
+#%RAML 1.0
+title: osrx-sapi
+description: This API is designed to Extract and Push Data(files) from citizens to osrx.
+version: v1
+protocols:
+  - HTTPS
+
+securitySchemes:
+  client-id-enforcement: !include resources/clientIdEnforcementSecurityScheme.raml
+
+traits:
+  having-error-responses: !include resources/errorResponseTrait.raml
+
+/osrx:
+  is: having-error-responses
+  securedBy: client-id-enforcement
+  post:
+    description: To transfer files from citizens to osrx
+    headers:
+      operation:
+        required: true
+        type: string
+        enum:
+          - list
+          - create
+          - read
+          - write
+          - delete
+          - move
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include /examples/Response.json
+

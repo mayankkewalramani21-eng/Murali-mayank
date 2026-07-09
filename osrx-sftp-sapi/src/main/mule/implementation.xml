@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="write-osrx-files" doc:id="2984b4a2-c6c7-4009-b422-4bd029e4341c" >
+		<logger level="INFO" doc:name="start of write-osrx-files flow" doc:id="4243e6aa-b2db-4231-8bf9-9c1df32ea6aa" message="start of write-osrx-files flow"/>
+		<sftp:write doc:name="Write to osrx" doc:id="9d391ca4-1286-4471-a54a-32f7f5fedb55" config-ref="osrx_SFTP_Config" path="#[attributes.headers.filePath]" createParentDirectories="false" mode="CREATE_NEW">
+		</sftp:write>
+		<ee:transform doc:name="response payload" doc:id="42e6c71a-301e-4f03-a12e-afef1a12da6c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "File upload completed",
+	"statusCode": "200"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of write-osrx-files flow" doc:id="291b0907-573b-41d2-b06c-946c212c9f54" message="end of write-osrx-files flow"/>
+	</sub-flow>
+	<sub-flow name="move-osrx-files" doc:id="edcfb32c-b37e-4eae-819e-f5ccb2ec6319" >
+		<logger level="INFO" doc:name="start of move-osrx-files flow" doc:id="724980e9-7beb-4b89-8f06-8600192b0f28" message="start of move-osrx-files flow" />
+		<sftp:move doc:name="Move file from source to destination in SFTP" doc:id="f0cc3992-95a5-4d2c-b0d2-d2c72e5f9bca" config-ref="osrx_SFTP_Config" sourcePath="#[payload.sourceFilePath]" targetPath="#[payload.destinationFilePath]" renameTo="#[payload.updatedFileName]"/>
+		<ee:transform doc:name="response payload" doc:id="bc224235-9575-4218-801e-f38b2cff6c80" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "File move completed",
+	"statusCode": "200"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of move-osrx-files flow" doc:id="fc0c6923-92fe-43c8-ad9d-c078e7a5fe5c" message="end of move-osrx-files flow" />
+	</sub-flow>
+	<sub-flow name="rename-osrx-files" doc:id="f4bab787-bc63-4e36-84d4-e005cc3dd76f" >
+		<logger level="INFO" doc:name="start of rename-osrx-files flow" doc:id="b83396ac-9215-456d-b3e7-94b86f0f09b0" message="start of rename-osrx-files flow" />
+		<sftp:rename doc:name="Rename file in SFTP" doc:id="53bf396a-978d-4ce1-a233-a31ec6ef2456" config-ref="osrx_SFTP_Config" path="#[payload.sourcePath]" to="#[payload.updatedName]"/>
+		<ee:transform doc:name="response payload" doc:id="8e8481e4-6fc0-420f-a0b0-090dd0145cc5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "File rename completed",
+	"statusCode": "200"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of rename-osrx-files flow" doc:id="072509a9-0521-4b7f-88b2-4be0a44fe982" message="end of rename-osrx-files flow" />
+	</sub-flow>
+	<sub-flow name="delete-osrx-files" doc:id="6ef1eb95-1033-44ff-aeef-986bcf7bb250" >
+		<logger level="INFO" doc:name="start of delete-osrx-files flow" doc:id="70a02755-05ea-441f-ac7f-6c852baee262" message="start of delete-osrx-files flow" />
+		<sftp:delete doc:name="Delete from osrx" doc:id="3610a2d6-e717-4a78-afad-8d1ea7394c09" config-ref="osrx_SFTP_Config" path="#[payload.filePath]"/>
+		<ee:transform doc:name="response payload" doc:id="399050fc-921e-448c-af2f-7d5869e36e00">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "File delete completed",
+	"statusCode": "200"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of delete-osrx-files flow" doc:id="d494571d-2c28-48b4-b9e2-09e147f9dd25" message="end of delete-osrx-files flow" />
+	</sub-flow>
+	<sub-flow name="list-osrx-files" doc:id="18b9782f-9007-4d9c-9ab6-1f273326fffd" >
+		<logger level="INFO" doc:name="start of list-osrx-files flow" doc:id="98ca6675-a85a-4b9d-9165-219cb1d4d9ea" message="start of list-osrx-files flow" />
+		<sftp:list doc:name="List osrx files" doc:id="6742cced-2061-4461-ac08-9d50a8dcf6f3" config-ref="osrx_SFTP_Config" directoryPath="#[payload.filePath]"/>
+		<ee:transform doc:name="payload to json" doc:id="4ea5c4a6-ef5c-4a34-ab90-a681bb5418e1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if(payload is Array) payload else []]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of list-osrx-files flow" doc:id="53efaa92-c4f4-4550-b23b-b232b6bd862b" message="end of list-osrx-files flow" />
+	</sub-flow>
+	<sub-flow name="read-osrx-files" doc:id="2146449f-b55f-44b3-baf2-60705394083e" >
+		<logger level="INFO" doc:name="start of read-osrx-files flow" doc:id="f71cc92a-186a-4c5e-9f99-4b441fd844ac" message="start of read-osrx-files flow" />
+		<sftp:read doc:name="Read files from osrx" doc:id="dae0d234-8160-4c93-bcb2-346efe8c4b76" config-ref="osrx_SFTP_Config" path="#[payload.filePath]"/>
+		<logger level="INFO" doc:name="end of read-osrx-files flow" doc:id="547d4747-c091-47f6-b983-888025b99ed2" message="end of read-osrx-files flow" />
+	</sub-flow>
+	<sub-flow name="create-osrx-files" doc:id="6997551a-6f1e-44c5-b03e-1d6c6f2887d0" >
+		<logger level="INFO" doc:name="start of create-directory-osrx-files flow" doc:id="358e9139-172a-46a1-ad50-674f596a9191" message="start of create-directory-osrx-files flow"/>
+		<sftp:create-directory doc:name="Create Directory" doc:id="353d1b3a-5eb0-4ade-8ac0-4988f3b3c2be" config-ref="osrx_SFTP_Config" directoryPath="#[payload.folderName]"/>
+		<ee:transform doc:name="payload to json" doc:id="d5d5674a-582f-4d80-b48e-2e92bc90ecd3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end of create-directory-osrx-files flow" doc:id="2ad74e84-b452-478d-b3f3-8f43c936cd73" message="end of create-directory-osrx-files flow"/>
+	</sub-flow>
+</mule>

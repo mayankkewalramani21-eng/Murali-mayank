@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuleSoft Error Alert</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa; /* Light Background */
+            margin: 0;
+            padding: 20px;
+            color: #343a40; /* Darker Text */
+        }
+        .container {
+            max-width: 700px;
+            background: #ffffff; /* White Container */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #7b51ca, #5b5bef); /* Soft Gradient Header */
+            color: #ffffff;
+            padding: 22px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .content {
+            line-height: 1.7;
+        }
+        .error-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .error-table th, .error-table td {
+            padding: 14px;
+            text-align: left;
+        }
+        .error-table th {
+            background: linear-gradient(to right, #8b45e1, #6161f4); /* Light Gradient Table Header */
+            color: #ffffff;
+            font-weight: 600;
+            width: 30%;
+        }
+        .error-table tr:nth-child(even) {
+            background-color: #f1f3f5; /* Light Alternating Rows */
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            text-align: center;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+            padding-top: 20px;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .icon {
+            color: #667eea;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="icon">🚨</span> MuleSoft Error Alert
+        </div>
+        <div class="content">
+            <p>Greetings,</p>
+            <p>An error has occurred during the processing of your data. Please review the following details:</p>
+            <table class="error-table">
+                <tr>
+                    <th>Application Name</th>
+                    <td>#[output text --- vars.eventDetails.'application']</td>
+                </tr>
+                <tr>
+                    <th>Flow Name</th>
+                    <td>#[output text --- vars.eventDetails.'flowName']</td>
+                </tr>
+                <tr>
+                    <th>Source</th>
+                    <td>#[output text --- vars.eventDetails.'source']</td>
+                </tr>
+                <tr>
+                    <th>Destination</th>
+                    <td>#[output text --- vars.eventDetails.'destination']</td>
+                </tr>
+                <tr>
+                    <th>Correlation ID</th>
+                    <td>#[output text --- vars.eventDetails.'correlationId']</td>
+                </tr>
+                <tr>
+                    <th>Timestamp</th>
+                    <td>#[output text --- vars.eventDetails.'timestamp']</td>
+                </tr>
+                <tr>
+                    <th>Error Type</th>
+                    <td>#[output text --- vars.errorDetails.'type']</td>
+                </tr>
+                <tr>
+                    <th>Error Description</th>
+                    <td>#[output text --- vars.errorDetails.'description']</td>
+                </tr>
+                <tr>
+                    <th>Error Payload</th>
+                    <td>#[output text --- vars.errorDetails.'payload']</td>
+                </tr>
+            </table>
+            <p>To access detailed logs and investigate further, please log in to the <a href="https://anypoint.mulesoft.com/login/" target="_blank">Anypoint Platform</a>. Navigate to Runtime Manager, select the relevant application, and access the logs.</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated alert. For assistance, please contact the MuleSoft Integration Support Team.</p>
+        </div>
+    </div>
+</body>
+</html>

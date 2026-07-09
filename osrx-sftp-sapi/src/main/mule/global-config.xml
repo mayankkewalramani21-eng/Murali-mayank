@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:outlook365="http://www.mulesoft.org/schema/mule/outlook365" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd  http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd http://www.mulesoft.org/schema/mule/outlook365 http://www.mulesoft.org/schema/mule/outlook365/current/mule-outlook365.xsd http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+    <configuration-properties doc:name="Configuration properties" doc:id="aab6b2f4-7aa7-4932-a94a-6e7b3daa20ce" doc:description="Environment-agnostic properties" file="properties/common.yaml" />
+    <secure-properties:config name="common-secure-properties-config" doc:name="Secure Properties Config" doc:id="a88195d5-00fc-441f-9dca-978c8d58a362" doc:description="Environment-agnositic secure properties" file="properties/common.yaml" key="${mule.key}" />
+    <configuration-properties doc:name="Configuration properties" doc:id="07883ad2-a6d2-48fe-a932-9b9b46b74d9e" file="properties/${mule.env}.yaml" doc:description="Environment-specific properties" />
+    <secure-properties:config name="env-secure-properties-config" doc:name="Secure Properties Config" doc:id="7ea665f2-295c-4b5b-b359-2a487001dc25" doc:description="Environment-specific secure properties" file="properties/${mule.env}.yaml" key="${mule.key}" />
+    <sftp:config name="osrx_SFTP_Config" doc:name="SFTP Config" doc:id="9acf878a-0f13-496a-b4c3-4de71cf56c54">
+        <sftp:connection host="${secure::sftp-osrx.host}" port="${secure::sftp-osrx.port}" username="${secure::sftp-osrx.username}" password="${secure::sftp-osrx.password}" sshConfigOverride="${app.home}/mule_sshd_config" workingDir="/">
+            <reconnection failsDeployment="true">
+                <reconnect frequency="${secure::sftp-osrx.reconnection.frequency}" count="${secure::sftp-osrx.reconnection.attempts}" />
+            </reconnection>
+        </sftp:connection>
+    </sftp:config>
+    <configuration doc:name="Configuration" doc:id="26465544-20bb-4790-a85d-2c15f6027009" defaultErrorHandler-ref="global-error-handler" doc:description="Global configuration for default error handler" />
+    <api-gateway:autodiscovery apiId="${api.id}" ignoreBasePath="false" doc:name="API Autodiscovery" doc:id="7ff49edd-a5e6-4a81-8322-4013fcf146bf" flowRef="osrx-sapi-main" />
+</mule>

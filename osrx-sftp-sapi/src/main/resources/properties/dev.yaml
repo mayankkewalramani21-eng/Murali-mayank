@@ -1,0 +1,9 @@
+# Development environment-specific properties
+api:
+  id: "20723057"
+
+sftp-osrx:
+  host: "osrxlifefile.blob.core.windows.net"
+  port: "22"
+  username: "osrxlifefile.lifefile"
+  password: "![7OLlEZQdyxZ/MTPOm5oExIVWKhfkOTa4bVo6PWc6r8z78FUdH+iqknIZAxqLaq4e]"

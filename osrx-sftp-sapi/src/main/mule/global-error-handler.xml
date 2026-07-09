@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:outlook365="http://www.mulesoft.org/schema/mule/outlook365" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/outlook365 http://www.mulesoft.org/schema/mule/outlook365/current/mule-outlook365.xsd">
+	<error-handler name="global-error-handler" doc:id="ec17dfbc-2020-42a6-bd40-33f4b309f76c" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="on-error-propagate" doc:id="26e4a407-e226-4feb-b3d5-4610791c36c8" type="ANY">
+			<logger level="INFO" doc:name="received-in-error-handler-log" doc:id="34fe1cc2-487d-43f8-93f6-856f311106be" message="Processing flow received in global error handler." />
+			<ee:transform doc:name="errorDetails" doc:id="f0c0ff3a-f72c-45a8-b3b6-944fcc78007a" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="errorDetails" ><![CDATA[%dw 2.0
+output application/json
+---
+modules::errorDetails::main(payload: {
+	"type": [error.errorType.namespace,error.errorType.identifier] filter(!isBlank($)) joinBy ":",
+	"description": error.detailedDescription,
+	"payload": error.errorMessage.payload
+})]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<set-payload value='#[{&#10;	"status": "Failed",&#10;	"error": vars.errorDetails,&#10;}]' doc:name="set-response-payload" doc:id="da5024a4-f1b0-4834-91ee-8c4f87f4fa7d" />
+			<logger level="INFO" doc:name="completed-log" doc:id="0778817f-51a4-4cf5-8dce-dd8c160f4c53" message="COMPLETED"/>
+		</on-error-propagate>
+	</error-handler>
+	
+</mule>
